@@ -1,0 +1,36 @@
+name:                adventofcode
+version:             0.1.0.0
+synopsis:            Simple project template from stack
+description:         Please see README.md
+homepage:            https://github.com/fredrik-jansson-se/adventofcode#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Fredrik Jansson
+maintainer:          fredrik.jansson.se@gmail.com
+copyright:           2016 Fredrik Jansson
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable adventofcode
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  other-modules:       Astar, One, Two, Three, Four, Day5, Day6, Day7, Day8, Day9, Day10, 
+                       Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19, Day20,
+                       Day21, Day22, Day23, Day24, Day25
+  build-depends:       base >= 4.7 && < 5,
+                       array,
+                       bytestring,
+                       bytestring-conversion,
+                       base16-bytestring,
+                       containers,
+                       cryptohash,
+                       protolude,
+                       psqueues,
+                       regex-pcre,
+                       regex-tdfa,
+                       regex-tdfa-text,
+                       split,
+                       text
