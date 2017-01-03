@@ -33,4 +33,5 @@ executable adventofcode
                        regex-tdfa,
                        regex-tdfa-text,
                        split,
-                       text
+                       text,
+                       vector
