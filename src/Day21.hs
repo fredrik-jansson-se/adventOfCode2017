@@ -156,14 +156,21 @@ part1 = do
   -- let tcmd = "swap position 4 with position 0\nswap letter d with letter b\nreverse positions 0 through 4\nrotate left 1 step\nmove position 1 to position 4\nmove position 3 to position 0\nrotate based on position of letter b\nrotate based on position of letter d"
   let cmds = map parse $ C8.lines tcmd :: [Cmd]
   let res = foldl (flip runCmd) pwd cmds
-  print res
-  let ans = "ok" :: Text
+  let ans = show res :: Text
   putStrLn $ mappend "day21-1: " ans
   -- defchgab
 
+permutedPwd :: ByteString -> [ByteString]
+permutedPwd str = map (str2vec . C8.pack) $ L.permutations $ C8.unpack str
+
 part2 :: IO ()
 part2 = do
-  let ans = "ok" :: Text
+  -- scramb: "fbgdceah"
+  tcmd <- BS.readFile "day21" 
+  let cmds = map parse $ C8.lines tcmd :: [Cmd]
+  let pwds = map (\pwd -> (pwd, foldl (flip runCmd) pwd cmds)) $ permutedPwd "abcdefgh"
+  let res = filter ((== "fbgdceah") . snd) pwds
+  let ans = show res :: Text
   putStrLn $ mappend "day21-2: " ans
   -- fbhcgaed
 
