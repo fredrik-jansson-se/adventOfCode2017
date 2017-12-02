@@ -62,7 +62,7 @@ part1 = do
 
 getLenToGoal :: Int -> S.Set Pos -> Pos -> S.Set Pos
 getLenToGoal seed pos goal = let
-  fns = AStarFns (distance goal)  distance  (Day13.getNeighbors seed)
+  fns = AStarFns (distance goal) distance (Day13.getNeighbors seed)
   start = Pos 1 1
   steps = astar fns start goal :: Maybe [Pos]
   log = show $ S.size pos :: Text
@@ -70,21 +70,26 @@ getLenToGoal seed pos goal = let
     if S.member goal pos
        then pos
        else case steps of
-              Just s | length steps < 50 -> (S.union pos $ S.fromList s)
-              _ -> pos
+                          Just s | length steps < 50 -> (S.union pos $ S.fromList s)
+                          _ -> pos
 
 part2 :: IO ()
 part2 = do
-  -- let seed = 1364
-  -- let goals = genGoals seed
-  -- let start = Pos 1 1
-  -- let dists = foldl' (getLenToGoal seed) S.empty goals :: Set Pos
-  -- let ans = show $ S.size dists :: Text
-  let ans = "failed" :: Text
+  let seed = 1364
+  let goals = genGoals seed
+  let start = Pos 1 1
+  let init = S.fromList [start]
+  let dists = foldl' (getLenToGoal seed) init goals :: Set Pos
+  print dists
+  let d2 = S.filter (\g -> distance start g <= 50) dists
+  let ans = show $ S.size d2 :: Text
+  -- let ans = "failed" :: Text
   putStrLn $ mappend "day13-2: " ans
   -- 713
   -- 271
   -- 263 to high
+  -- 209
+  -- 210
 
           
 

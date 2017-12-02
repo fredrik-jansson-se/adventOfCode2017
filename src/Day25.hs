@@ -3,83 +3,160 @@
 module Day25 where
 
 import Protolude
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as C8
 import Data.ByteString.Conversion (fromByteString)
+import Data.List ((!!))
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.Maybe (fromJust)
+import Data.String (String)
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
 import Text.Regex.PCRE
 
-data Disk = Disk 
-  { 
-  totalDisk :: Int, 
-  usedDisk :: Int, 
-  freeDisk :: Int 
-  } deriving (Show)
+type Output = [Int]
+data Registers = Registers { a::Int, b::Int, c::Int, d::Int, output::Output } deriving (Show)
 
-parse :: ByteString -> Maybe (Int, Int, Disk)
-parse str = do 
-  let regex = "/dev/grid/node\\-x(\\d+)\\-y(\\d+)\\s*(\\d+)T\\s*(\\d+)T\\s*(\\d+)T\\s*(\\d+)%" :: ByteString
-  let matches = str =~ regex :: AllTextSubmatches [] ByteString
-  let res = getAllTextSubmatches matches :: [ByteString]
-  (_:xs:ys:total_s:used_s:avail_s:_) <- case res of
-                                          [] -> Nothing
-                                          _ -> Just res
-  x <- fromByteString xs
-  y <- fromByteString ys
-  total <- fromByteString total_s
-  used <- fromByteString used_s
-  return (x, y, Disk total used (total - used))
+type ProgramLine = Int
 
-type Pos = (Int, Int)
-type DM = M.Map Pos Disk
+data Command = Command { runCmd :: (ProgramLine, Registers) -> (ProgramLine, Registers) } 
 
-add :: DM -> Maybe (Int, Int, Disk) -> DM
-add m (Just (x,y,d)) = M.insert (x,y) d m 
+getRegVal :: Char -> Registers -> Int
+getRegVal 'a' = a
+getRegVal 'b' = b
+getRegVal 'c' = c
+getRegVal 'd' = d
 
-neighbors :: Pos -> DM -> [(Int, Int)]
-neighbors (x,y) m = filter (\x -> M.member x m) nbrs
+setRegVal :: Char -> Int -> Registers -> Registers
+setRegVal 'a' val r = r { a = val}
+setRegVal 'b' val r = r { b = val}
+setRegVal 'c' val r = r { c = val}
+setRegVal 'd' val r = r { d = val}
+
+isRegName :: Text -> Bool
+isRegName t = T.isInfixOf t "abcd"
+
+copyRegister :: Char -> Char -> Registers -> Registers
+copyRegister from to regs = newRegs
   where
-    nbrs = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
+    val = getRegVal from regs
+    newRegs = setRegVal to val regs
 
-validPair :: Disk -> Disk -> Bool
-validPair (Disk _ used _) (Disk _ _ avail) = used <= avail
-
-validNbrs :: DM -> Pos -> [Pos]
-validNbrs m p =
-  let
-    nbrs = neighbors p m
-    this :: Disk
-    this = m M.! p 
-    vp n = validPair this $ m M.! n
-  in
-    filter vp nbrs
-
-viablePairs :: DM -> [Pos] -> S.Set Pos
-viablePairs m r = vp r S.empty
+copyValue :: Text -> Char -> Registers -> Registers
+copyValue tval to = setRegVal to val
   where
-    vp [] acc = acc
-    vp (a:rs) acc = trace log $ vp rs newAcc
+    val = getDecimal tval
+
+decReg :: Char -> Registers -> Registers
+decReg to regs = newRegs
+  where
+    newVal = getRegVal to regs - 1
+    newRegs = setRegVal to newVal regs
+
+incReg :: Char -> Registers -> Registers
+incReg to regs = newRegs
+  where
+    newVal = getRegVal to regs + 1
+    newRegs = setRegVal to newVal regs
+
+runRegex :: Text -> Text -> Maybe [Text]
+runRegex st rt = case res of 
+                   [] -> Nothing
+                   _ -> Just $ map T.pack res
+  where
+    s = T.unpack st
+    r = T.unpack rt
+    (_, _, _, res) = s =~ r :: (String, String, String, [String])
+
+
+parseCpy :: Text -> Maybe Command
+parseCpy str = 
+  let 
+  in do
+  (from:tot:_) <- runRegex str "cpy (\\d+|[a-d]) ([a-d])"
+  let to = T.head tot
+  let cmd = if isRegName from 
+      then Command $ \(line, regs) -> (line + 1, copyRegister (T.head from) to regs)
+      else Command $ \(line, regs) -> (line + 1, copyValue from to regs)
+  return cmd
+
+parseDecInc :: Text -> Maybe Command
+parseDecInc str = do
+  (typText:regText:_) <- runRegex str "(dec|inc) ([a-d])"
+  let reg = T.head regText
+  let typ = T.head typText
+  let cmd = if typ == 'd' 
+      then Command $ \(line, regs) -> (line + 1, decReg reg regs)
+      else Command $ \(line, regs) -> (line + 1, incReg reg regs)
+  return cmd
+
+doJnz val noJump jump = 
+  if 0 == val 
+     then noJump
+     else jump
+
+jnz :: Char -> Registers -> ProgramLine -> ProgramLine -> ProgramLine
+jnz reg regs noJump jump = doJnz val noJump jump
+  where
+    val = getRegVal reg regs
+
+getDecimal :: Text -> Int
+getDecimal str | T.head str == '-' = -(getDecimal $ T.tail str)
+               | otherwise = case TR.decimal str of 
+                               Right (val, _) -> val
+
+parseJnz :: Text -> Maybe Command
+parseJnz str = do
+  (regText:addrT:_) <- runRegex str "jnz (\\d|[a-d]) (-?\\d+)"
+  let reg = T.head regText :: Char
+  let addr = getDecimal addrT
+  let cmd = if isRegName regText
+      then Command $ \(line, regs) -> (jnz reg regs (line+1) $ line + addr, regs)
+      else Command $ \(line, regs) -> (doJnz (toDig reg) (line+1) $ line + addr, regs)
+  return cmd
+  where
+    toDig '0' = 0
+    toDig '1' = 1
+
+out :: Char -> Registers -> Registers
+out reg regs = traceShow o $ regs { output = o }
+  where
+    val = getRegVal reg regs
+    o = output regs ++ [val]
+
+parseOut :: Text -> Maybe Command
+parseOut str =  do
+  (regText:_) <- runRegex str "out ([a-d])"
+  let reg = T.head regText :: Char
+  return $ Command $ \(line, regs) -> (line + 1, out reg regs)
+
+
+parse :: Text -> Command
+parse str = parse' [parseCpy, parseDecInc, parseJnz, parseOut]
+  where
+    parse' (p:ps) = fromMaybe (parse' ps) $ p str
+    parse' [] = trace str undefined
+
+runProgram :: ProgramLine -> [Command] -> Registers -> Registers
+runProgram lne cmds = run' lne
+  where
+    run' line regs 
+      | line >= length cmds = regs
+      | otherwise = run' nextLine newRegs
       where
-        a_disk = m M.! a
-        mm = M.delete a m
-        keys = M.keys mm
-        valids = filter (\other -> validPair a_disk $ mm M.! other) keys
-        log = mappend "valids len " (show $ length valids :: Text)
-        newAcc = S.union acc $ S.fromList valids
+        cmd = cmds !! line
+        (nextLine, newRegs) = runCmd cmd (line, regs)
 
 part1 :: IO ()
 part1 = do
-  d <- C8.readFile "day25"
-  let p = filter isJust $ map parse $ C8.lines d
-  let lu = foldl' add M.empty p
-  let keys = M.keys lu
-  let valids = viablePairs lu keys
-  let ans = show $ S.size valids :: Text
+  -- d <- readFile "day25"
+  -- let cmds = map parse $ T.lines d
+  -- let regs = Registers 1 0 0 0 []
+  -- let res = runProgram 0 cmds regs
+  -- print res
+  let ans = "ok" :: Text
   putStrLn $ mappend "day25-1: " ans
-  -- 906
 
 part2 :: IO ()
 part2 = do
