@@ -4,15 +4,10 @@ module Day1 where
 
 import Protolude
 
-import Data.Char(digitToInt)
 import qualified Data.Text as T
 import Data.Maybe (fromJust)
 import Data.List ((!!))
-
-toInts :: Text -> [Int]
-toInts t = map digitToInt s
-  where
-    s = T.unpack t
+import Common
 
 count :: [Int] -> Int -> Int
 count (_:[]) sum = sum

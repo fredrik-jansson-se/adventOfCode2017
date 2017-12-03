@@ -5,6 +5,7 @@ import Test.Hspec
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Day1 as Day1
+import qualified Day2 as Day2
 
 main :: IO ()
 main = hspec $ do
@@ -35,4 +36,17 @@ main = hspec $ do
       it "can solve 1" $ do
         line <- TIO.readFile "day1.txt"
         Day1.solve2(T.init line) `shouldBe` 1072
+    describe "Day2" $ do 
+      it "can solve example" $ do
+        let txt = "5 1 9 5\n7 5 3\n2 4 6 8" :: Text
+        Day2.solve1(txt) `shouldBe` 18
+      it "can solve 1" $ do
+        line <- TIO.readFile "day2.txt"
+        Day2.solve1(T.init line) `shouldBe` 46402
+      it "can solve example 2" $ do
+        let txt = "5 9 2 8\n9 4 7 3\n3 8 6 5\n" :: Text
+        Day2.solve2(txt) `shouldBe` 9
+      it "can solve 2" $ do
+        line <- TIO.readFile "day2.txt"
+        Day2.solve2(T.init line) `shouldBe` 265
 
