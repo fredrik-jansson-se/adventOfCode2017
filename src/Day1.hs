@@ -3,23 +3,52 @@
 module Day1 where
 
 import Protolude
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as C8
-import Data.ByteString.Conversion (fromByteString)
 
-part1 :: IO ()
-part1 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day1-1: " ans
+import Data.Char(digitToInt)
+import qualified Data.Text as T
+import Data.Maybe (fromJust)
+import Data.List ((!!))
 
-part2 :: IO ()
-part2 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day1-2: " ans
+toInts :: Text -> [Int]
+toInts t = map digitToInt s
+  where
+    s = T.unpack t
+
+count :: [Int] -> Int -> Int
+count (_:[]) sum = sum
+count (a:b:tl) sum 
+  | a == b = count (a:tl) (sum + a)
+  | otherwise = count (b:tl) sum
 
 
-run :: IO ()
-run = do
-  part1
-  part2
+solve :: Text -> Int
+solve txt = let 
+  i = toInts txt
+  h = fromJust $ head i
+  ii = i ++ [h]
+  in
+   count ii 0
+
+count2 :: [Int] -> Int -> Int -> Int -> Int
+count2 _ _ 0 sum = sum
+count2 (a:tl) add len sum = let
+  b = tl !! add
+  nlen = len - 1
+  nsum = sum + a
+  in
+  -- traceShow (a, b, tl) $
+    if a == b
+        then count2 tl add nlen nsum
+        else count2 tl add nlen sum
+  
+
+solve2 :: Text -> Int
+solve2 txt = let
+  i = toInts txt
+  l = length i
+  add = l `div` 2 - 1
+  ii = i ++ i
+  in 
+    count2 ii add l 0
+    
 

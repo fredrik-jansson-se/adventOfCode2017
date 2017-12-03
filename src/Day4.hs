@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude, OverloadedStrings #-}
 
-module Day1 where
+module Day4 where
 
 import Protolude
 import qualified Data.ByteString as BS
