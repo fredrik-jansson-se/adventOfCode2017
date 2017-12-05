@@ -1,25 +1,39 @@
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Day4 where
 
 import Protolude
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as C8
-import Data.ByteString.Conversion (fromByteString)
 
-part1 :: IO ()
-part1 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day25-1: " ans
+import qualified Data.Text as T
+import qualified Data.Set as Set
 
-part2 :: IO ()
-part2 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day25-2: " ans
+isValid :: [Text] -> Bool
+isValid txt = length txt == Set.size set
+  where
+    set = Set.fromList txt
+
+isValid2 :: [Text] -> Bool
+isValid2 txt = length sorted == Set.size ssorted
+  where
+    tsort :: Text -> Text
+    tsort = T.pack . sort . T.unpack
+    sorted = map tsort txt
+    ssorted = Set.fromList sorted
 
 
-run :: IO ()
-run = do
-  part1
-  part2
+solve1 :: Text -> Int
+solve1 txt = let
+  lin = T.lines txt
+  wrds = map T.words lin
+  valids = filter identity $ map isValid wrds
+  in
+    length valids
 
+solve2 :: Text -> Int
+solve2 txt = let
+  lin = T.lines txt
+  wrds = map T.words lin
+  valids = filter identity $ map isValid2 wrds
+  in
+    length valids
+  

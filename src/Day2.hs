@@ -55,4 +55,4 @@ solve2 txt = let
   ints = map (sort . toInts) li
   d = map (divs 0) ints
   in
-    traceShow ints $ sum d
+    sum d

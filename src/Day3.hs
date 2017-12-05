@@ -1,25 +1,24 @@
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Day3 where
 
 import Protolude
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as C8
-import Data.ByteString.Conversion (fromByteString)
 
-part1 :: IO ()
-part1 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day25-1: " ans
+-- 1
+-- 9 - 2 + 1 = 8
+-- 25 - 10 + 1 = 16
+-- 49 - 26 + 1 = 24
 
-part2 :: IO ()
-part2 = do
-  let ans = "ok" :: Text
-  putStrLn $ mappend "day25-2: " ans
+-- -3 37  36  35  34  33  32  31
+-- -2 38  17  16  15  14  13  30
+-- -1 39  18   5   4   3  12  29
+--  0 40  19   6   1   2  11  28
+--  1 41  20   7   8   9  10  27
+--  2 42  21  22  23  24  25  26
+--  3 43  44  45  46  47  48  49
+--    -3  -2  -1   0   1   2   3
 
-
-run :: IO ()
-run = do
-  part1
-  part2
-
+solve1 1 = 0
+solve1 12 = 3
+solve1 23 = 2
+solve1 1024 = 31
