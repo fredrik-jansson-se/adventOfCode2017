@@ -13,29 +13,20 @@ main :: IO ()
 main = hspec $ do
   describe "AdventOfCode" $ do
     describe "Day1" $ do 
-      it "can solve 1122" $ do
+      it "solve 1" $ do
         Day1.solve("1122") `shouldBe` 3
-      it "can solve 1111" $ do
         Day1.solve("1111") `shouldBe` 4
-      it "can solve 1234" $ do
         Day1.solve("1234") `shouldBe` 0
-      it "can solve 91212129" $ do
         Day1.solve("91212129") `shouldBe` 9
-      it "can solve 1" $ do
         line <- TIO.readFile "day1.txt"
         Day1.solve(T.init line) `shouldBe` 1216
 
-      it "can solve 1212" $ do
+      it "can solve 2" $ do
         Day1.solve2("1212") `shouldBe` 6
-      it "can solve 1221" $ do
         Day1.solve2("1221") `shouldBe` 0
-      it "can solve 123425" $ do
         Day1.solve2("123425") `shouldBe` 4
-      it "can solve 123123" $ do
         Day1.solve2("123123") `shouldBe` 12
-      it "can solve 12131415" $ do
         Day1.solve2("12131415") `shouldBe` 4
-      it "can solve 1" $ do
         line <- TIO.readFile "day1.txt"
         Day1.solve2(T.init line) `shouldBe` 1072
     describe "Day2" $ do 
@@ -57,7 +48,10 @@ main = hspec $ do
         Day3.solve1(12) `shouldBe` 3
         Day3.solve1(23) `shouldBe` 2
         Day3.solve1(1024) `shouldBe` 31
-        Day3.solve1(361527) `shouldBe` 31
+        Day3.solve1(361527) `shouldBe` 326
+      it "can solve 2" $ do
+        Day3.solve2(805) `shouldBe` 806
+        Day3.solve2(361527) `shouldBe` 363010
     describe "Day4" $ do
       it "can solve 1" $ do
         Day4.solve1("aa bb cc dd ee\n") `shouldBe` 1
@@ -73,6 +67,3 @@ main = hspec $ do
         Day4.solve2("oiii ioii iioi iiio\n") `shouldBe` 0
         file <- TIO.readFile "day4.txt"
         Day4.solve2(file) `shouldBe` 186
-
-
-
