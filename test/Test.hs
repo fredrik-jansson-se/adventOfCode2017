@@ -9,6 +9,7 @@ import qualified Day2 as Day2
 import qualified Day3 as Day3
 import qualified Day4 as Day4
 import qualified Day5 as Day5
+import qualified Day6 as Day6
 
 main :: IO ()
 main = hspec $ do
@@ -77,3 +78,12 @@ main = hspec $ do
         Day5.solve2("0\n3\n0\n1\n-3") `shouldBe` 10
         -- file <- TIO.readFile "day5.txt"
         -- Day5.solve2(file) `shouldBe` 28372145
+    describe "Day6" $ do
+      it "can solve 1" $ do
+        Day6.solve1("0 2 7 0") `shouldBe` 5
+        -- file <- TIO.readFile "day6.txt"
+        -- Day6.solve1(file) `shouldBe` 6681
+      it "can solve 2" $ do
+        Day6.solve2("0 2 7 0") `shouldBe` 4
+        -- file <- TIO.readFile "day6.txt"
+        -- Day6.solve2(file) `shouldBe` 2392
