@@ -10,6 +10,7 @@ import qualified Day3 as Day3
 import qualified Day4 as Day4
 import qualified Day5 as Day5
 import qualified Day6 as Day6
+import qualified Day7 as Day7
 
 main :: IO ()
 main = hspec $ do
@@ -87,3 +88,14 @@ main = hspec $ do
         Day6.solve2("0 2 7 0") `shouldBe` 4
         -- file <- TIO.readFile "day6.txt"
         -- Day6.solve2(file) `shouldBe` 2392
+    describe "Day7" $ do
+      it "can solve 1" $ do
+        let v1 = Day7.solve1("pbga (66)\nxhth (57)\nebii (61)\nhavc (66)\nktlj (57)\nfwft (72) -> ktlj, cntj, xhth\nqoyq (66)\npadx (45) -> pbga, havc, qoyq\ntknk (41) -> ugml, padx, fwft\njptl (61)\nugml (68) -> gyxo, ebii, jptl\ngyxo (61)\ncntj (57)\n")
+        v1 `shouldBe` "tknk"
+        file <- TIO.readFile "day7.txt"
+        Day7.solve1(file) `shouldBe` "hlqnsbe"
+      it "can solve 2" $ do
+        let v1 = Day7.solve2 "pbga (66)\nxhth (57)\nebii (61)\nhavc (66)\nktlj (57)\nfwft (72) -> ktlj, cntj, xhth\nqoyq (66)\npadx (45) -> pbga, havc, qoyq\ntknk (41) -> ugml, padx, fwft\njptl (61)\nugml (68) -> gyxo, ebii, jptl\ngyxo (61)\ncntj (57)\n" "tknk"
+        v1 `shouldBe` 60
+        file <- TIO.readFile "day7.txt"
+        Day7.solve2 file "hlqnsbe"  `shouldBe` 1993
