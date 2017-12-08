@@ -28,6 +28,8 @@ library
                        base16-bytestring,
                        containers,
                        cryptohash,
+                       parsec,
+                       parsec3-numbers,
                        protolude,
                        psqueues,
                        regex-pcre-builtin,

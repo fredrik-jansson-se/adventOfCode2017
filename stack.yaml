@@ -62,6 +62,8 @@ extra-package-dbs: []
 extra-include-dirs:
   - /opt/local/include
 # extra-lib-dirs: [/path/to/dir]
+extra-deps:
+  - parsec3-numbers-0.1.0
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor

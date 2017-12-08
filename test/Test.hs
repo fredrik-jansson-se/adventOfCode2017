@@ -11,6 +11,7 @@ import qualified Day4 as Day4
 import qualified Day5 as Day5
 import qualified Day6 as Day6
 import qualified Day7 as Day7
+import qualified Day8 as Day8
 
 main :: IO ()
 main = hspec $ do
@@ -99,3 +100,14 @@ main = hspec $ do
         v1 `shouldBe` 60
         file <- TIO.readFile "day7.txt"
         Day7.solve2 file "hlqnsbe"  `shouldBe` 1993
+    describe "Day8" $ do
+      it "can solve 1" $ do
+        let i = "b inc 5 if a > 1\na inc 1 if b < 5\nc dec -10 if a >= 1\nc inc -20 if c == 10\n"
+        Day8.solve1 i `shouldBe` 1
+        file <- TIO.readFile "day8.txt"
+        Day8.solve1 file `shouldBe` 3880
+      it "can solve 2" $ do
+        let i = "b inc 5 if a > 1\na inc 1 if b < 5\nc dec -10 if a >= 1\nc inc -20 if c == 10\n"
+        Day8.solve2 i `shouldBe` 10
+        file <- TIO.readFile "day8.txt"
+        Day8.solve2 file `shouldBe` 5035
