@@ -12,6 +12,7 @@ import qualified Day5 as Day5
 import qualified Day6 as Day6
 import qualified Day7 as Day7
 import qualified Day8 as Day8
+import qualified Day9 as Day9
 
 main :: IO ()
 main = hspec $ do
@@ -111,3 +112,26 @@ main = hspec $ do
         Day8.solve2 i `shouldBe` 10
         file <- TIO.readFile "day8.txt"
         Day8.solve2 file `shouldBe` 5035
+    describe "Day9" $ do
+      it "can eat garbage" $ do
+        Day9.eatGarbage "<>" `shouldBe` ("", 1)
+        Day9.eatGarbage "<random characters>" `shouldBe` ("", 18)
+        Day9.eatGarbage "<<<<>" `shouldBe` ("", 4)
+        Day9.eatGarbage "<{!>}>" `shouldBe` ("", 3)
+        Day9.eatGarbage "<!!>" `shouldBe` ("", 1)
+        Day9.eatGarbage "<!!!>>" `shouldBe` ("", 1)
+        Day9.eatGarbage "<{o\"i!a,<{i<a>" `shouldBe` ("", 11)
+      it "can solve 1" $ do
+        Day9.solve1 "{}" `shouldBe` 1
+        Day9.solve1 "{{{}}}" `shouldBe` 6
+        Day9.solve1 "{{},{}}" `shouldBe` 5
+        Day9.solve1 "{{{},{},{{}}}}" `shouldBe` 16
+        Day9.solve1 "{<a>,<a>,<a>,<a>}" `shouldBe` 1
+        Day9.solve1 "{{<ab>},{<ab>},{<ab>},{<ab>}}" `shouldBe` 9
+        Day9.solve1 "{{<!!>},{<!!>},{<!!>},{<!!>}}" `shouldBe` 9
+        Day9.solve1 "{{<a!>},{<a!>},{<a!>},{<ab>}}" `shouldBe` 3
+        file <- TIO.readFile "day9.txt"
+        Day9.solve1 file `shouldBe` 9662
+      it "can solve 1" $ do
+        file <- TIO.readFile "day9.txt"
+        Day9.solve2 file `shouldBe` 4903
