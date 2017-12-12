@@ -13,10 +13,15 @@ import qualified Day6 as Day6
 import qualified Day7 as Day7
 import qualified Day8 as Day8
 import qualified Day9 as Day9
+import qualified Day10 as Day10
+import qualified Common as C
 
 main :: IO ()
 main = hspec $ do
   describe "AdventOfCode" $ do
+    describe "Common" $ do
+      it "can parse csv" $ do
+        C.csv "1,2,3, 5, 7" `shouldBe` [1,2,3,5,7]
     describe "Day1" $ do 
       it "solve 1" $ do
         Day1.solve("1122") `shouldBe` 3
@@ -135,3 +140,16 @@ main = hspec $ do
       it "can solve 1" $ do
         file <- TIO.readFile "day9.txt"
         Day9.solve2 file `shouldBe` 4903
+    describe "Day10" $ do
+      it "solve 1" $ do
+        Day10.solve1 5 "3, 4, 1, 5" `shouldBe` 12
+        file <- TIO.readFile "day10.txt"
+        Day10.solve1 256 file `shouldBe` 1980
+      it "solve 2" $ do
+        Day10.solve2 256 "" `shouldBe` "a2582a3a0e66e6e86e3812dcb672a272"
+        Day10.solve2 256 "AoC 2017" `shouldBe` "33efeb34ea91902bb2f59c9920caa6cd"
+        Day10.solve2 256 "1,2,3" `shouldBe` "3efbe78a8d82f29979031a4aa0b16a9d"
+        Day10.solve2 256 "1,2,4" `shouldBe` "63960835bcdc130f0b66d7ff4f6a5a8e"
+        file <- TIO.readFile "day10.txt"
+        Day10.solve2 256 file `shouldBe` "899124dac21012ebc32e2f4d11eaec55"
+
