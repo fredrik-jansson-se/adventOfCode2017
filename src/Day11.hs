@@ -2,82 +2,78 @@
 
 module Day11 where
 
-import Protolude
-import Data.Array
--- import qualified Base as PBase
-import qualified Data.Text.Lazy as T
+import Protolude hiding ((<|>))
+import Text.Parsec as P
+import Text.Parsec.Prim
+import Text.Parsec.Text
 
-import Data.List(intersperse)
+data Dir = NW
+         | N
+         | NE
+         | SE
+         | S
+         | SW
+         deriving (Show, Eq)
 
-data Floor = Floor {floor::Int, e::Bool, hg::Bool, hm::Bool, lg::Bool, lm::Bool}
+ts :: [Char] -> Parsec Text () [Char]
+ts s = P.try $ string s
 
-showFloor :: Floor -> LText
-showFloor (Floor num e hg hm lg lm) = T.intercalate space ss
-     where
-       space = " " :: LText
-       ss :: [LText]
-       ss = [mappend "F" $ show num,
-             if e then "E" else ".",
-             if hg then "HG" else ". ",
-             if hm then "HM" else ". ",
-             if lg then "LG" else ". ",
-             if lm then "LM" else ". "]
+dir :: Parsec Text () Dir
+dir = do
+  d <- ts "nw" <|> ts "ne" <|> ts "n" <|> ts "se" <|> ts "sw" <|> ts "s"
+  skipMany $ P.char ','
+  spaces
+  return $ case d of
+    "nw" -> NW
+    "n" -> N
+    "ne" -> NE
+    "se" -> SE
+    "s" -> S
+    "sw" -> SW
 
-validFloor :: Floor -> Bool
--- Can't have HM and LG only
-validFloor f 
--- Can't have HM and LG only
-  | hm f && lg f && (not $ hg f) = False
--- Can't have HG and LM only
-  | lm f && hg f && (not $ lg f) = False
-validFloor (Floor _ _ True  False _    True) = False
-validFloor _ = True
+dirs :: Parsec Text () [Dir]
+dirs = many1 dir
 
-type GameState = Array Int Floor
-validState :: GameState -> Bool
-validState = all validFloor
+parseDirections :: Text -> [Dir]
+parseDirections txt = 
+  case parse  dirs "day11" txt of
+    Left err -> traceShow err []
+    Right dirs -> dirs
 
-{-
- F4 .  .  .  .  .  
- F3 .  .  .  LG .  
- F2 .  HG .  .  .  
- F1 E  .  HM .  LM 
--}
+type Coord = (Int, Int)
 
-data Move = Move { doMove :: Floor -> (Floor, Floor) }
+move :: Coord -> Dir -> Coord
+move (x,y) NW = (x - 1, y + 1)
+move (x,y) N =  (x + 0, y + 2)
+move (x,y) NE = (x + 1, y + 1)
+move (x,y) SE = (x + 1, y - 1)
+move (x,y) S =  (x + 0, y - 2)
+move (x,y) SW = (x - 1, y - 1)
 
-moveHG :: Floor -> (Floor, Floor)
-moveHG = undefined
+dist :: Coord -> Int
+dist (x,y) = let
+  x1 = x - 1
+  y1 = y - 1
+  in
+    ((abs x1) + (abs y1)) `div` 2
+    
 
+solve1 :: Text -> Int
+solve1 txt = let
+  dirs = parseDirections txt
+  start = (1,1)
+  end = foldl' move start dirs
+  in dist end
 
-initState1 :: GameState
-initState1 = listArray (1,4) [ Floor 1 True False True False True,
-                              Floor 2 False True False False False,
-                              Floor 3 False False False True False,
-                              Floor 4 False False False False False
-                            ]
-showState :: GameState -> LText
-showState gs = T.unlines $ [showFloor $ gs ! f | f <- [4,3,2,1]]
-
-part1 :: IO ()
-part1 = do
-  let ans = "ok" :: Text
-  print $ showFloor (Floor 1 True False True False True)
-  let is = initState1
-  putStrLn $ showState is
-  let valid = map validFloor is
-  putStrLn $ (show valid :: Text)
-
-  print $ "day11-1: " ++ show ans
-
-part2 :: IO ()
-part2 = do
-  let ans = "ok"
-  putStrLn $ "day11-2: " ++ ans
-
-
-run :: IO ()
-run = do
-  part1
-  part2
-
+solve2 :: Text -> Int
+solve2 txt = let
+  dirs = parseDirections txt
+  start = (1,1)
+  mv :: Coord -> Dir -> Int -> (Coord, Int)
+  mv pos d m = (pos', m')
+    where
+      pos' = move pos d
+      m' = maximum [m,  dist pos']
+  (_, max) = foldl' (\(pos, m) d -> mv pos d m) (start, 0) dirs
+  in max
+  
