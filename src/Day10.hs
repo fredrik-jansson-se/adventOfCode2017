@@ -78,7 +78,8 @@ sh v = if length h < 2
       h = showHex v ""
   
 
-solve2 len txt = let
+hash :: Int -> Text -> Text
+hash len txt = let
   line = case head $ T.lines txt of
           Nothing -> ""
           Just h -> h
@@ -91,4 +92,6 @@ solve2 len txt = let
   hash = concat $ map sh dh 
   in
     T.pack hash
+
+solve2 = hash
   

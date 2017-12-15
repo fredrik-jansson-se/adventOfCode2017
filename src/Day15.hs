@@ -3,80 +3,53 @@
 module Day15 where
 
 import Protolude
-import qualified Data.Text as T
-import qualified Data.Text.Read as TR
-import Text.Regex.PCRE
 
-data Disk = Disk { 
-  dNum :: Int,
-  dPositions :: Int,
-  dPos :: Int 
-  } deriving (Show)
+aFactor = 16807
+bFactor = 48271
+divisor = 2147483647
+iters = 5000000
 
--- Disc #1 has 13 positions; at time=0, it is at position 1.
--- Disc #2 has 19 positions; at time=0, it is at position 10.
--- Disc #3 has 3 positions; at time=0, it is at position 2.
--- Disc #4 has 7 positions; at time=0, it is at position 1.
--- Disc #5 has 5 positions; at time=0, it is at position 3.
--- Disc #6 has 17 positions; at time=0, it is at position 5.
-init1 :: [Disk]
-init1 = [
-  Disk 1 13 1,
-  Disk 2 19 10,
-  Disk 3 3 2,
-  Disk 4 7 1,
-  Disk 5 5 3,
-  Disk 6 17 5]
+advanceA v = r `seq` r
+  where r = (v * aFactor) `rem` divisor
 
-init2 :: [Disk]
-init2 = init1 ++ [Disk 7 11 0]
+advanceA2 v = let
+  r = (v * aFactor) `rem` divisor
+  in if r `rem` 4 == 0 then r `seq` r
+    else advanceA2 r
 
-advanceDisk :: Disk -> Disk
-advanceDisk disk = 
-  let 
-    max = dPositions disk
-    curPos = dPos disk
-    newPos = (curPos + 1)  `mod` max
-  in
-  disk { dPos = newPos }
+advanceB v = r `seq` r 
+  where r = (v * bFactor) `rem` divisor
 
-advanceN :: (Num t, Eq t) => t -> Disk -> Disk
-advanceN 0 disk = disk
-advanceN n disk = advanceN n' disk'
-  where 
-    disk' = advanceDisk disk
-    n' = n - 1
+advanceB2 v = let
+  r = (v * bFactor) `rem` divisor
+  in if r `rem` 8 == 0 then r `seq` r
+    else advanceB2 r
 
-advanceDiskWithPos :: Disk -> Disk
-advanceDiskWithPos disk = advanceN (dNum disk) disk
+replA :: Int -> [Int]
+replA init = drop 1 $ reverse $ foldl' (\(h:tl) _ -> (advanceA h):h:tl) [init] [1..iters]
 
-allAtPos0 :: [Disk] -> Bool
-allAtPos0 = all (\disk -> dPos disk == 0)
+replB :: Int -> [Int]
+replB init = drop 1 $ reverse $ foldl' (\(h:tl) _ -> (advanceB h):h:tl) [init] [1..iters]
 
-runDisks disks t 
-  | allAtPos0 disks = t
-  | otherwise       = runDisks disks' t'
+replA2 :: Int -> [Int]
+replA2 init = drop 1 $ reverse $ foldl' (\(h:tl) _ -> (advanceA2 h):h:tl) [init] [1..iters]
+
+replB2 :: Int -> [Int]
+replB2 init = drop 1 $ reverse $ foldl' (\(h:tl) _ -> (advanceB2 h):h:tl) [init] [1..iters]
+
+mask :: Int -> Int
+mask a = m `seq` m
   where
-    disks' = map advanceDisk disks
-    t' = t + 1
+    m = a .&. 0xffff
 
-part1 :: IO ()
-part1 = do
-  let discountedInit = map advanceDiskWithPos init1
-  let ans = runDisks discountedInit 0
-  print "day15-1: " 
-  print ans
+solve1 :: Int -> Int -> Int
+solve1 a b = let
+  z = zip (replA a) (replB b)
+  in
+    length $ filter (\(a,b) -> Day15.mask a == Day15.mask b) z
 
-part2 :: IO ()
-part2 = do
-  let discountedInit = map advanceDiskWithPos init2
-  let ans = runDisks discountedInit 0
-  print "day15-2: " 
-  print ans
-
-
-run :: IO ()
-run = do
-  part1
-  part2
-
+solve2 :: Int -> Int -> Int
+solve2 a b = let
+  z = zip (replA2 a) (replB2 b)
+  in
+    length $ filter (\(a,b) -> Day15.mask a == Day15.mask b) z

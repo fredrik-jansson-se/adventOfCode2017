@@ -17,6 +17,9 @@ import qualified Day10 as Day10
 import qualified Common as C
 import qualified Day11 as Day11
 import qualified Day12 as Day12
+import qualified Day13 as Day13
+import qualified Day14 as Day14
+import qualified Day15 as Day15
 
 main :: IO ()
 main = hspec $ do
@@ -147,13 +150,13 @@ main = hspec $ do
     --     Day10.solve1 5 "3, 4, 1, 5" `shouldBe` 12
     --     file <- TIO.readFile "day10.txt"
     --     Day10.solve1 256 file `shouldBe` 1980
-    --   it "solve 2" $ do
-    --     Day10.solve2 256 "" `shouldBe` "a2582a3a0e66e6e86e3812dcb672a272"
-    --     Day10.solve2 256 "AoC 2017" `shouldBe` "33efeb34ea91902bb2f59c9920caa6cd"
-    --     Day10.solve2 256 "1,2,3" `shouldBe` "3efbe78a8d82f29979031a4aa0b16a9d"
-    --     Day10.solve2 256 "1,2,4" `shouldBe` "63960835bcdc130f0b66d7ff4f6a5a8e"
-    --     file <- TIO.readFile "day10.txt"
-    --     Day10.solve2 256 file `shouldBe` "899124dac21012ebc32e2f4d11eaec55"
+      -- it "solve 2" $ do
+      --   Day10.solve2 256 "" `shouldBe` "a2582a3a0e66e6e86e3812dcb672a272"
+      --   Day10.solve2 256 "AoC 2017" `shouldBe` "33efeb34ea91902bb2f59c9920caa6cd"
+      --   Day10.solve2 256 "1,2,3" `shouldBe` "3efbe78a8d82f29979031a4aa0b16a9d"
+      --   Day10.solve2 256 "1,2,4" `shouldBe` "63960835bcdc130f0b66d7ff4f6a5a8e"
+      --   file <- TIO.readFile "day10.txt"
+      --   Day10.solve2 256 file `shouldBe` "899124dac21012ebc32e2f4d11eaec55"
     -- describe "Day11" $ do
     --   it "can solve 1" $ do
     --     Day11.solve1 "ne,ne,ne" `shouldBe` 3
@@ -165,16 +168,36 @@ main = hspec $ do
     --   it "can solve 1" $ do
     --     file <- TIO.readFile "day11.txt"
     --     Day11.solve2 file `shouldBe` 1567
-    describe "Day12" $ do
-      it "can parse" $ do
-        Day12.parse "2 <-> 0, 3, 4\n" `shouldBe` [(2, [0,3,4])]
-      it "can solve 1" $ do
-        Day12.solve1 "0 <-> 2\n1 <-> 1\n2 <-> 0, 3, 4\n3 <-> 2, 4\n4 <-> 2, 3, 6\n5 <-> 6\n6 <-> 4, 5\n" `shouldBe` 6
-        file <- TIO.readFile "day12.txt"
-        Day12.solve1 file `shouldBe` 378
+    -- describe "Day12" $ do
+    --   it "can parse" $ do
+    --     Day12.parse "2 <-> 0, 3, 4\n" `shouldBe` [(2, [0,3,4])]
+    --   it "can solve 1" $ do
+    --     Day12.solve1 "0 <-> 2\n1 <-> 1\n2 <-> 0, 3, 4\n3 <-> 2, 4\n4 <-> 2, 3, 6\n5 <-> 6\n6 <-> 4, 5\n" `shouldBe` 6
+    --     file <- TIO.readFile "day12.txt"
+    --     Day12.solve1 file `shouldBe` 378
+    --   it "can solve 2" $ do
+    --     Day12.solve2 "0 <-> 2\n1 <-> 1\n2 <-> 0, 3, 4\n3 <-> 2, 4\n4 <-> 2, 3, 6\n5 <-> 6\n6 <-> 4, 5\n" `shouldBe` 2
+    --     file <- TIO.readFile "day12.txt"
+    --     Day12.solve2 file `shouldBe` 204
+    -- describe "Day13" $ do
+    --   it "can parse" $ do
+    --     Day13.parse "0: 3\n1: 2\n4: 4\n6: 4\n" `shouldBe` [(0,3), (1,2), (4,4), (6,4)]
+    --   it "can solve 1" $ do
+    --     Day13.solve1 "0: 3\n1: 2\n4: 4\n6: 4\n" `shouldBe` 24
+    --     file <- TIO.readFile "day13.txt"
+    --     Day13.solve1 file `shouldBe` 1840
+    --   it "can solve 2" $ do
+    --     Day13.solve2 "0: 3\n1: 2\n4: 4\n6: 4\n" `shouldBe` 10
+    --     file <- TIO.readFile "day13.txt"
+    --     Day13.solve2 file `shouldBe` 3850260
+    -- describe "Day14" $ do
+    --   it "can solve 1" $ do
+    --     Day14.solve1 "flqrgnkx" `shouldBe` 8108
+    --     Day14.solve1 "ugkiagan" `shouldBe` 8292
+    describe "Day15" $ do
+      -- it "can solve 1" $ do
+      --   Day15.solve1 65 8921 `shouldBe` 588
+      --   Day15.solve1 289 629 `shouldBe` 638
       it "can solve 2" $ do
-        Day12.solve2 "0 <-> 2\n1 <-> 1\n2 <-> 0, 3, 4\n3 <-> 2, 4\n4 <-> 2, 3, 6\n5 <-> 6\n6 <-> 4, 5\n" `shouldBe` 2
-        file <- TIO.readFile "day12.txt"
-        Day12.solve2 file `shouldBe` 204
-
-
+        Day15.solve2 65 8921 `shouldBe` 309
+        Day15.solve2 289 629 `shouldBe` 343

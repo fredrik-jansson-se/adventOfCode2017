@@ -3,98 +3,94 @@
 module Day13 where
 
 import Protolude
-import qualified Data.Set as S
-import qualified Data.Text as T
-import qualified Data.Text.Read as TR
-import Data.Maybe (fromJust)
-import Text.Regex.PCRE
-import Astar
-import Numeric (showIntAtBase)
-import Data.Char (intToDigit)
 
-data Pos = Pos Int Int deriving (Show, Eq, Ord)
+import Text.Parsec as P
+import Text.Parsec.Prim
+import Text.Parsec.Text
+import Text.Parsec.Number
+import qualified Data.IntMap as IM
+import qualified Data.Map.Strict as M
 
-ee :: Int -> Bool
-ee i = even $ ee' i 0
+-- 0: 3
+line :: Parsec Text () (Int, Int)
+line = do
+  k <- int
+  char ':'
+  spaces
+  val <- int
+  newline
+  return (k, val)
+
+parse :: Text -> [(Int, Int)]
+parse txt = 
+  case P.parse (many1 line) "day13" txt of
+    Left err -> traceShow err []
+    Right xs -> xs
+
+data Layer = Layer {
+  layerPos :: Int,
+  layerDir :: Int,
+  layerBottom :: Int
+} deriving (Show)
+
+advance :: Layer -> Layer
+advance (Layer pos dir bottom) 
+  | pos == 0 && dir == -1 = Layer (pos + 1) 1 bottom
+  | pos == bottom && dir == 1 = Layer (pos - 1) (-1) bottom 
+  | otherwise = Layer (pos + dir) dir bottom
+
+
+createLayer :: Int -> Layer
+createLayer range = Layer 0 1 (range - 1)
+
+type LM = M.Map Int Layer
+
+advanceScanners :: LM -> LM
+advanceScanners = M.map advance
+
+isCaught :: Int -> LM -> Bool
+isCaught pos layers = 
+  case M.lookup pos layers of
+    Nothing -> False
+    Just l -> 0 == layerPos l
+
+severity :: LM -> Int -> Int
+severity m pos = pos * range
   where
-    ee' :: Int -> Int -> Int
-    ee' 0 acc = acc
-    ee' i acc | odd i = ee' (i `div` 2) (acc+1)
-      | otherwise = ee' (i `div` 2) acc
+    l = m M.! pos
+    range = 1 + layerBottom l
 
-isOpen :: Int -> Pos -> Bool
-isOpen seed (Pos x y) = (x>=0 ) && (y>=0) && isEven
-  where
-    val = seed +  x*x + 3*x + 2*x*y + y + y*y
-    isEven = ee val
-    bin = showIntAtBase 2 intToDigit val "" 
-    -- log = bin
-    -- ones = length $ filter (=='1') bin
-    -- isEven = even ones
+solve1 :: Text -> Int
+solve1 txt = let
+  dpts = Day13.parse txt :: [(Int, Int)]
+  layers = map createLayer $ M.fromList dpts
+  (max, _) = M.findMax layers
+  (_, res) = foldl' f (layers, []) [0..max]
+  f (layers, caught) pos | isCaught pos layers = (advanceScanners layers, (pos:caught))
+                         | otherwise = (advanceScanners layers, caught)
+  sevs = map (severity layers) res
+  in sum sevs
 
-getNeighbors :: Int -> Pos -> [Pos]
-getNeighbors seed (Pos x y) = ngbrs
-  where
-    pos = [Pos (x - 1) y, Pos (x + 1) y,
-           Pos x $ y - 1, Pos x $ y + 1]
-    ngbrs = filter (isOpen seed) pos
+delay :: Int -> LM -> LM
+delay cnt layers | cnt == 0 = layers
+                 | otherwise = delay (cnt - 1) $ advanceScanners layers
 
+icc [] _ = False
+icc (x:xs) layers = 
+  if isCaught x layers 
+    then True
+    else icc xs (advanceScanners layers)
 
-distance :: Pos -> Pos -> Int
-distance (Pos x1 y1) (Pos x2 y2) = abs(x1-x2) + abs (y1 - y2)
+try max delay layers =
+  if icc [0..max] layers
+    then Day13.try max (delay + 1) (advanceScanners layers)
+    else delay
+  
 
-genGoals :: Int -> [Pos]
-genGoals seed = filter ff [Pos x y | x <- [0..50], y <- [0..50]]
-  where
-    start = Pos 1 1
-    ff = \p -> isOpen seed p && distance start p < 50
-
-part1 :: IO ()
-part1 = do
-  -- let start = Pos 1 1
-  -- let goal = Pos 31 39
-  -- let seed = 1364
-  -- let fns = AStarFns (distance goal) distance  (Day13.getNeighbors seed)
-  -- let path = fromJust $ astar fns start goal
-  -- let ans = show $ length path :: Text
-  let ans = "86" :: Text
-  putStrLn $ mappend "day13-1: " ans
-
-getLenToGoal :: Int -> S.Set Pos -> Pos -> S.Set Pos
-getLenToGoal seed pos goal = let
-  fns = AStarFns (distance goal) distance (Day13.getNeighbors seed)
-  start = Pos 1 1
-  steps = astar fns start goal :: Maybe [Pos]
-  log = show $ S.size pos :: Text
-  in
-    if S.member goal pos
-       then pos
-       else case steps of
-                          Just s | length steps < 50 -> (S.union pos $ S.fromList s)
-                          _ -> pos
-
-part2 :: IO ()
-part2 = do
-  let seed = 1364
-  let goals = genGoals seed
-  let start = Pos 1 1
-  let init = S.fromList [start]
-  let dists = foldl' (getLenToGoal seed) init goals :: Set Pos
-  print dists
-  let d2 = S.filter (\g -> distance start g <= 50) dists
-  let ans = show $ S.size d2 :: Text
-  -- let ans = "failed" :: Text
-  putStrLn $ mappend "day13-2: " ans
-  -- 713
-  -- 271
-  -- 263 to high
-  -- 209
-  -- 210
-
-          
-
-run :: IO ()
-run = do
-  part1
-  part2
+solve2 :: Text -> Int
+solve2 txt = let
+  dpts = Day13.parse txt :: [(Int, Int)]
+  layers = map createLayer $ M.fromList dpts
+  (max, _) = M.findMax layers
+  in Day13.try max 0 layers
 

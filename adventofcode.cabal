@@ -37,6 +37,7 @@ library
                        regex-tdfa-text,
                        split,
                        text,
+                       text-show,
                        vector
 
 test-suite aoc-test
