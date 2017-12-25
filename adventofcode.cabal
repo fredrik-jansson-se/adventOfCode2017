@@ -30,6 +30,7 @@ library
                        cryptohash,
                        parsec,
                        parsec3-numbers,
+                       primitive,
                        protolude,
                        psqueues,
                        regex-pcre-builtin,

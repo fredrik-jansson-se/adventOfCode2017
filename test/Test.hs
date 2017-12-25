@@ -20,6 +20,8 @@ import qualified Day12 as Day12
 import qualified Day13 as Day13
 import qualified Day14 as Day14
 import qualified Day15 as Day15
+import qualified Day16 as Day16
+import qualified Day17 as Day17
 
 main :: IO ()
 main = hspec $ do
@@ -194,10 +196,30 @@ main = hspec $ do
     --   it "can solve 1" $ do
     --     Day14.solve1 "flqrgnkx" `shouldBe` 8108
     --     Day14.solve1 "ugkiagan" `shouldBe` 8292
-    describe "Day15" $ do
-      -- it "can solve 1" $ do
-      --   Day15.solve1 65 8921 `shouldBe` 588
-      --   Day15.solve1 289 629 `shouldBe` 638
-      it "can solve 2" $ do
-        Day15.solve2 65 8921 `shouldBe` 309
-        Day15.solve2 289 629 `shouldBe` 343
+    --   it "can solve 2" $ do
+    --     Day14.solve2 "flqrgnkx" `shouldBe` 1242
+    --     Day14.solve2 "ugkiagan" `shouldBe` 1069
+    -- describe "Day15" $ do
+    --   it "can solve 1" $ do
+    --     Day15.solve1 65 8921 `shouldBe` 588
+    --     Day15.solve1 289 629 `shouldBe` 638
+    --   it "can solve 2" $ do
+    --     Day15.solve2 65 8921 `shouldBe` 309
+    --     Day15.solve2 289 629 `shouldBe` 343
+    -- describe "Day16" $ do
+    --   it "can solve 1" $ do
+    --     v1 <- Day16.solve1 "s1,x3/4,pe/b" "abcde" 
+    --     v1 `shouldBe` "baedc"
+    --     file <- TIO.readFile "day16.txt"
+    --     v2 <- Day16.solve1 file "abcdefghijklmnop" 
+    --     v2 `shouldBe` "dcmlhejnifpokgba"
+    --   it "can solve 2" $ do
+    --     Day16.solve2 "s1,x3/4,pe/b" "abcde" 2 `shouldBe` "ceadb"
+    --     file <- TIO.readFile "day16.txt"
+    --     Day16.solve2 file "abcdefghijklmnop" 1000000000 `shouldBe` "dcmlhejnifpokgba"
+    -- describe "Day17" $ do
+    --   it "can solve 1" $ do
+    --     Day17.solve1 3 `shouldBe` 638
+    --     Day17.solve1 343 `shouldBe` 1914
+    --   it "can solve 2" $ do
+    --     Day17.solve2 343 `shouldBe` 41797835

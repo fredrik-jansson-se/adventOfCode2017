@@ -3,52 +3,144 @@
 module Day16 where
 
 import Protolude
-import qualified Data.String as S
 import qualified Data.Text as T
-import qualified Data.Text.Read as TR
-import Text.Regex.PCRE
+import qualified Data.String as S
+import Text.Parsec as P
+import Text.Parsec.Prim
+import Text.Parsec.Text
+import Text.Parsec.Number
+import qualified Data.Vector.Unboxed.Mutable as MV
+import qualified Data.Vector.Unboxed as V
+import qualified Data.IntMap as M
+import Control.Monad.Primitive
 
-a2b :: S.String -> S.String
-a2b d = invert' d []
-  where
-    invert' :: S.String -> S.String -> S.String
-    invert' [] acc       = acc
-    invert' ('0':xs) acc = invert' xs ('1':acc)
-    invert' ('1':xs) acc = invert' xs ('0':acc)
+type Pos = Int
+type Program = Char
+data Cmd = Spin Int
+         | Exchange Pos Pos
+         | Partner Program Program
+         deriving (Show)
 
-expandA :: S.String -> S.String
-expandA a = a ++ ['0'] ++ a2b a
+parseSpin :: Parsec Text () Cmd
+parseSpin = Text.Parsec.Prim.try $ do
+  char 's'
+  num <- int
+  return $ Spin num
 
-expandUntil :: Int -> S.String -> S.String
-expandUntil size a 
-  | length a >= size = checksum $ take size a
-  | otherwise        = expandUntil size $ expandA a
+parseExchange :: Parsec Text() Cmd
+parseExchange = Text.Parsec.Prim.try $ do
+  char 'x'
+  from <- int
+  char '/'
+  to <- int
+  return $ Exchange from to
 
-checksum :: S.String -> S.String
-checksum str = if even $ length theCS
-                 then checksum theCS
-                 else theCS
-  where
-    cs acc (a:b:xs) = cs (csC a b : acc) xs
-    cs acc _ = reverse acc
-    csC a b 
-      | a == b    = '1'
-      | otherwise = '0'
+parsePartner :: Parsec Text() Cmd
+parsePartner = Text.Parsec.Prim.try $ do
+  char 'p'
+  from <- anyChar
+  char '/'
+  to <- anyChar
+  return $ Partner from to
 
-    theCS = cs [] str
-      
+parseCmd :: Parsec Text () Cmd
+parseCmd = parseSpin P.<|> parseExchange P.<|> parsePartner
 
-part1 :: IO ()
-part1 = 
-  print $ expandUntil 272 "00101000101111010"
+program :: Parsec Text () [Cmd]
+program = parseCmd `sepBy` (char ',')
 
-part2 :: IO ()
-part2 = 
-  print $ expandUntil 35651584 "00101000101111010"
+-- type VT = IO (MV.MVector RealWorld Char)
+type VT = V.Vector Char
 
+type MC = M.IntMap Char
 
-run :: IO ()
-run = do
-  part1
-  part2
+execute :: Text -> Cmd -> Text
+execute txt (Spin pos) = let
+  l = T.length txt
+  (a,b) = T.splitAt (l - pos) txt
+  in T.append b a
+execute txt (Exchange pos1 pos2) = let
+  r1 = T.index txt pos1
+  r2 = T.index txt pos2
+  txt' = T.map (\c -> if c == r1 then r2 else if c == r2 then 'x' else c) txt
+  txt'' = T.map (\c -> if c == 'x' then r1 else c) txt'
+  in
+    execute txt (Partner r1 r2)
+execute txt (Partner r1 r2) = let
+  txt' = T.map (\c -> if c == r1 then r2 else if c == r2 then 'x' else c) txt
+  txt'' = T.map (\c -> if c == 'x' then r1 else c) txt'
+  in
+    txt''
 
+executeVT :: VT -> Cmd -> VT
+executeVT v (Spin pos) = let
+  s = V.length v
+  (a,b) = V.splitAt (s-pos) v
+  in b V.++ a
+executeVT v (Exchange p1 p2) = let
+  c1 = v V.! p1
+  c2 = v V.! p2
+  in
+    V.imap (\idx v -> if idx == p1 then c2 else if idx == p2 then c1 else v) v
+executeVT v (Partner c1 c2) = let
+  p1 = case V.elemIndex c1 v of Just p -> p
+  p2 = case V.elemIndex c2 v of Just p -> p
+  in
+    executeVT v (Exchange p1 p2)
+
+executeM :: MC -> Cmd -> MC
+executeM v (Spin pos) = 
+  let s = M.size v
+  in
+    M.mapKeys (\k -> (k + pos) `rem` s) v
+executeM v (Exchange p1 p2) = let
+  c1 = v M.! p1
+  c2 = v M.! p2
+  in
+    M.insert p1 c2 $ M.insert p2 c1 v
+executeM v (Partner c1 c2) = 
+  M.map (\c -> if c == c1 then c2 else if c == c2 then c1 else c) v
+
+toMap:: Text -> MC
+toMap txt = foldl' (\m (i,c) -> M.insert i c m) M.empty $ zip [0..] (T.unpack txt)
+
+fromMap :: MC -> Text
+fromMap m = T.pack $ map snd $ M.toAscList m
+
+runProgram :: [Cmd] -> Text -> Text
+runProgram cmds regs = foldl' execute regs cmds
+
+runProgramVT :: [Cmd] -> VT -> VT
+runProgramVT cmds regs = foldl' executeVT regs cmds
+
+runProgramM :: [Cmd] -> MC -> MC
+runProgramM cmds regs = foldl' executeM regs cmds
+
+toVector :: Text -> VT
+toVector txt = let
+  v = V.fromList $ T.unpack txt
+  in 
+    v
+
+fromVector :: VT -> Text
+fromVector v = let
+  s = V.toList v
+  in T.pack s
+
+solve1 :: Text -> Text -> IO Text
+solve1 input regs = let
+  (h:_) = T.lines input
+  cmds = case P.parse program "day16" input of
+            Right r -> r
+  in 
+    return $ fromMap $ runProgramM cmds $ toMap regs
+
+solve2 :: Text -> Text -> Int -> Text
+solve2 input regs rounds = let
+  (h:_) = T.lines input
+  vregs = toMap regs
+  cmds = case P.parse program "day16" input of
+          Right r -> r
+  r = foldl' (\txt idx -> if idx `rem` 10 == 0 then traceShow idx $ runProgramM cmds txt else runProgramM cmds txt) vregs [1..rounds]
+  in 
+    fromMap r
