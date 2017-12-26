@@ -22,6 +22,8 @@ import qualified Day14 as Day14
 import qualified Day15 as Day15
 import qualified Day16 as Day16
 import qualified Day17 as Day17
+import qualified Day18 as Day18
+import qualified Day24 as Day24
 
 main :: IO ()
 main = hspec $ do
@@ -223,3 +225,13 @@ main = hspec $ do
     --     Day17.solve1 343 `shouldBe` 1914
     --   it "can solve 2" $ do
     --     Day17.solve2 343 `shouldBe` 41797835
+    describe "Day18" $ do
+      it "can solve 1" $ do
+        Day18.solve1 "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2" `shouldBe` 4
+        file <- TIO.readFile "day18.txt"
+        Day18.solve1 file `shouldBe` 1187
+    -- describe "Day24" $ do
+    --   it "can solve 1" $ do
+    --     Day24.solve1 "0/2\n2/2\n2/3\n3/4\n3/5\n0/1\n10/1\n9/10" `shouldBe` 31
+    --     file <- TIO.readFile "day24.txt"
+    --     Day24.solve1 file `shouldBe` 1914
