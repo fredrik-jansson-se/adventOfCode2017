@@ -1,102 +1,94 @@
-{-# LANGUAGE NoImplicitPrelude, OverloadedStrings #-}
+{-# LANGUAGE NoImplicitPrelude, OverloadedStrings, TypeSynonymInstances, FlexibleInstances #-}
 
 module Day20 where
 
 import Protolude
-import qualified Data.ByteString.Char8 as C8
-import Data.ByteString.Conversion (fromByteString)
-import Data.Maybe (fromJust)
-import qualified Data.String as S
-import qualified Data.Text as T
-import qualified Data.Text.Read as TR
-import Text.Regex.PCRE
+import Data.Monoid
+import Text.Parsec as P
+import Text.Parsec.Prim
+import Text.Parsec.Text
+import Text.Parsec.Number
 
-data Range = 
-  Range Int Int
-  deriving (Eq, Show)
+type Vector = (Int, Int, Int)
 
-instance Ord Range where
-  (Range _ h) <= (Range l _) = h <= l
-  
-overlapping :: Range -> Range -> Bool
-overlapping (Range l1 h1) (Range l2 h2) = 
-  (l2 <= l1 && l1 <= h2) ||
-    (l1 <= l2 && l2 <= h1) ||
-      (l2 - h1 == 1)
+-- instance Monoid Vector where
+--   mempty = (0, 0, 0)
+add (x1, y1, z1) (x2, y2, z2) = (x1+x2, y1+y2, z1+z2)
 
-inRange :: Int -> Range -> Bool
-inRange i (Range l h) = l <= i && i <= h
+data Particle = Particle {
+  position :: Vector,
+  velocity :: Vector,
+  acceleration :: Vector
+} deriving (Show)
 
-parse :: ByteString -> Range
-parse r = Range l h
-  where
-    regex = "(\\d+)\\-(\\d+)" :: ByteString
-    matches = r =~ regex :: AllTextSubmatches [] ByteString
-    (_:a:b:[]) = getAllTextSubmatches matches :: [ByteString]
-    l = fromJust $ fromByteString a 
-    h = fromJust $ fromByteString b
+pVector :: Parsec Text () Vector
+pVector = do
+  char '<'
+  x <- int
+  char ','
+  y <- int
+  char ','
+  z <- int
+  char '>'
+  return (x, y, z)
 
-combine :: Range -> Range -> Range
-combine (Range l1 h1) (Range l2 h2) = 
-  Range l h
-    where 
-      l = min l1 l2
-      h = max h1 h2
+pParticle :: Parsec Text () Particle
+pParticle = do
+  string "p="
+  p <- pVector
+  char ','
+  spaces
+  string "v="
+  v <- pVector
+  char ','
+  spaces
+  string "a="
+  a <- pVector
+  P.optional newline
+  return $ Particle p v a
 
-combine2 :: [Range] -> [Range]
-combine2 rngs = c2 rngs []
-  where
-    c2 :: [Range] -> [Range] -> [Range]
-    c2 (r:[]) acc = reverse $ r:acc
-    c2 (r:r':rs) acc 
-      | overlapping r r' = c2 (rr':rs) acc
-      | otherwise = c2 (r':rs) (r:acc)
-      where rr' = combine r r'
+parse :: Text -> [Particle]
+parse txt = case P.parse (many1 pParticle) "day20" txt of 
+  Left err -> traceShow err []
+  Right pts -> pts
 
-inRanges :: [Range] -> Int -> Bool
-inRanges [] _ = False
-inRanges (r:rs) i 
-  | inRange i r = True
-  | otherwise = inRanges rs i
+distToZero :: Particle -> Int
+distToZero Particle { position = pos } = let
+  (x,y,z) = pos
+  in
+    abs x + abs y + abs z
 
+simulate :: Particle -> Particle
+simulate part@Particle { position = p, velocity = v, acceleration = a} = let
+  v' = v `add` a
+  p' = p `add` v'
+  in
+    part { position = p', velocity = v' }
 
-size :: Range -> Int
-size (Range l h) = h - l + 1
+type PartState = (Bool, Int, Particle)
 
-part1 :: IO ()
-part1 = do
-  -- let d = "5-8\n0-2\n4-7" :: ByteString
-  -- d <- C8.readFile "day20"
-  -- let ranges = sort $ map parse $ C8.lines d :: [Range]
-  -- let combined = combine2 ranges
-  -- putStrLn $ (show combined :: Text)
-  -- let lowest = find (\i -> not $ inRanges combined i) [0..]
-  -- let ans = show lowest :: Text
-  let ans = "31053880" :: Text
-  putStrLn $ mappend "day20-1: " ans
+advance :: PartState -> PartState
+advance p@(False, oldDist, part) = p
+advance (_, oldDist, part) = let
+  part' = simulate part
+  newDist = distToZero part'
+  in
+    if newDist < oldDist
+        then (True, newDist, part')
+        else (False, oldDist, part)
 
-summer :: [Range] -> Int -> Int
-summer [] acc = acc
-summer (a:[]) acc = acc
-summer (a:b:rs) acc = summer (b:rs) newAcc
-  where
-    (Range _ h) = a
-    (Range l _) = b
-    newAcc = acc + l - h - 1
+anyActive :: [PartState] -> Bool
+anyActive = any (\(a, _, _) -> a)
 
-part2 :: IO ()
-part2 = do
-  -- d <- C8.readFile "day20"
-  -- let ranges = sort $ map parse $ C8.lines d :: [Range]
-  -- let combined = combine2 $ sort $ combine2 $ sort $ combine2 $ sort $ combine2 ranges
-  -- putStrLn (show combined :: Text)
-  -- let ans = show (summer combined 0) :: Text
-  let ans  = "117" :: Text
-  putStrLn $ mappend "day20-2: " ans
+run1 :: [PartState] -> [PartState]
+run1 p | anyActive p = run1 $ map advance p
+       | otherwise   = p
 
-
-run :: IO ()
-run = do
-  part1
-  part2
+solve1 :: Text -> Int
+solve1 txt = let
+  pts = Day20.parse txt
+  pd = map (\p -> (True, distToZero p, p)) pts
+  res = run1 pd
+  in
+    traceShow (res) 10
 

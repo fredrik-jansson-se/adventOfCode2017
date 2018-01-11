@@ -4,29 +4,31 @@ import Protolude
 import Test.Hspec
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import qualified Day1 as Day1
-import qualified Day2 as Day2
-import qualified Day3 as Day3
-import qualified Day4 as Day4
-import qualified Day5 as Day5
-import qualified Day6 as Day6
-import qualified Day7 as Day7
-import qualified Day8 as Day8
-import qualified Day9 as Day9
-import qualified Day10 as Day10
+import qualified Day1
+import qualified Day2
+import qualified Day3
+import qualified Day4
+import qualified Day5
+import qualified Day6
+import qualified Day7
+import qualified Day8
+import qualified Day9
+import qualified Day10
 import qualified Common as C
-import qualified Day11 as Day11
-import qualified Day12 as Day12
-import qualified Day13 as Day13
-import qualified Day14 as Day14
-import qualified Day15 as Day15
-import qualified Day16 as Day16
-import qualified Day17 as Day17
-import qualified Day18 as Day18
-import qualified Day24 as Day24
+import qualified Day11
+import qualified Day12
+import qualified Day13
+import qualified Day14
+import qualified Day15
+import qualified Day16
+import qualified Day17
+import qualified Day18
+import qualified Day19
+import qualified Day20
+import qualified Day24
 
 main :: IO ()
-main = hspec $ do
+main = hspec $ 
   describe "AdventOfCode" $ do
     -- describe "Common" $ do
     --   it "can parse csv" $ do
@@ -230,6 +232,15 @@ main = hspec $ do
         Day18.solve1 "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2" `shouldBe` 4
         file <- TIO.readFile "day18.txt"
         Day18.solve1 file `shouldBe` 1187
+      it "can solve 2" $ do
+        Day18.solve2 "snd 1\nsnd 2\nsnd p\nrcv a\nrcv b\nrcv c\nrcv d" `shouldBe` 3
+        file <- TIO.readFile "day18.txt"
+        Day18.solve2 file `shouldBe` 1
+    describe "Day20" $ do
+      it "can solve 1" $ do
+        Day20.solve1 "p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>\np=<4,0,0>, v=<0,0,0>, a=<-2,0,0>" `shouldBe` 1
+        file <- TIO.readFile "day20.txt"
+        Day20.solve1 file `shouldBe` 12
     -- describe "Day24" $ do
     --   it "can solve 1" $ do
     --     Day24.solve1 "0/2\n2/2\n2/3\n3/4\n3/5\n0/1\n10/1\n9/10" `shouldBe` 31

@@ -14,7 +14,7 @@ advance pos len skip lst = let
   (h', t') = splitAt len $ t ++ h
   hr = reverse h'
   (h'', t'') = splitAt (length t) $ hr ++ t'
-  nextPos = (pos + len + skip) `rem` (length lst)
+  nextPos = (pos + len + skip) `rem` length lst
   in
     (nextPos, t'' ++ h'')
 
@@ -50,7 +50,7 @@ parseLengths txt = asciiLengths txt ++ endSeq
     endSeq = [17, 31, 73, 47, 23]
 
 run2 :: [Int] -> [Int] -> Int -> Int -> [Int]
-run2 lst lts pos skip = run1 lst lts' pos skip
+run2 lst lts = run1 lst lts'
   where
     lts' = concat $ replicate 64 lts
 
@@ -80,18 +80,16 @@ sh v = if length h < 2
 
 hash :: Int -> Text -> Text
 hash len txt = let
-  line = case head $ T.lines txt of
-          Nothing -> ""
-          Just h -> h
+  line = fromMaybe "" $  head $ T.lines txt
   lts = parseLengths line
   ring = [0..(len-1)]
   pos = 0
   skip = 0
   sparseHash = run2 ring lts pos skip
   dh = denseHash sparseHash
-  hash = concat $ map sh dh 
+  hash = concatMap sh dh 
   in
     T.pack hash
 
-solve2 = hash
+solve2 = Day10.hash
   

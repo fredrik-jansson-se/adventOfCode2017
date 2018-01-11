@@ -28,6 +28,7 @@ library
                        base16-bytestring,
                        containers,
                        cryptohash,
+                       mtl,
                        parsec,
                        parsec3-numbers,
                        primitive,
