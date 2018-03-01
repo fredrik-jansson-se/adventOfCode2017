@@ -227,15 +227,15 @@ main = hspec $
     --     Day17.solve1 343 `shouldBe` 1914
     --   it "can solve 2" $ do
     --     Day17.solve2 343 `shouldBe` 41797835
-    describe "Day18" $ do
-      it "can solve 1" $ do
-        Day18.solve1 "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2" `shouldBe` 4
-        file <- TIO.readFile "day18.txt"
-        Day18.solve1 file `shouldBe` 1187
-      it "can solve 2" $ do
-        Day18.solve2 "snd 1\nsnd 2\nsnd p\nrcv a\nrcv b\nrcv c\nrcv d" `shouldBe` 3
-        file <- TIO.readFile "day18.txt"
-        Day18.solve2 file `shouldBe` 1
+    -- describe "Day18" $ do
+    --   it "can solve 1" $ do
+    --     Day18.solve1 "set a 1\nadd a 2\nmul a a\nmod a 5\nsnd a\nset a 0\nrcv a\njgz a -1\nset a 1\njgz a -2" `shouldBe` 4
+    --     file <- TIO.readFile "day18.txt"
+    --     Day18.solve1 file `shouldBe` 1187
+    --   it "can solve 2" $ do
+    --     Day18.solve2 "snd 1\nsnd 2\nsnd p\nrcv a\nrcv b\nrcv c\nrcv d" `shouldBe` 3
+    --     file <- TIO.readFile "day18.txt"
+    --     Day18.solve2 file `shouldBe` 1
     describe "Day20" $ do
       it "can solve 1" $ do
         Day20.solve1 "p=<3,0,0>, v=<2,0,0>, a=<-1,0,0>\np=<4,0,0>, v=<0,0,0>, a=<-2,0,0>" `shouldBe` 1
